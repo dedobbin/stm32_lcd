@@ -1,0 +1,10 @@
+*
+
+!.gitignore
+
+!Src
+!Src/hd44780.c
+
+!Inc
+!Inc/hd44780.h
+!Inc/bool.h
