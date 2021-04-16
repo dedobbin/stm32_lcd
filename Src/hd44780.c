@@ -10,26 +10,31 @@ void HD44780_init_I2C(I2C_HandleTypeDef* handle)
 	_i2c_handle = handle;
 	HD44780_set_addr(0X27);
 
-	HD44780_send_I2C(0x38, true, true); // 2 lines, 5x7
-	HD44780_send_I2C(0x2, true, true);	// Return home
-	HD44780_send_I2C(0xC, true, true);  // Turn on (with cursor off)
-	//LCD_command(0x0F, handle, I2C_addr); //Turn on (cursor blinking)
-	HD44780_send_I2C(0x1, true, true);	// Clear screen
+	// First instruction selects the 'function set': the amount of display lines, character font.
+	// For now just support 2 lines which can only use 5x7 dots per character. 1 line also can handle 5x10 dots character font
+	const uint8_t function_set = 0x38;
+	HD44780_send_I2C(function_set, true, true);
+
+	HD44780_send_I2C(HD44780_HOME, true, true);
+	HD44780_send_I2C(HD44780_DISPLAY_ON_CRS_OFF, true, true);
+	HD44780_send_I2C(HD44780_CLEAR, true, true);
 }
 
 void HD44780_send_I2C(uint8_t data, bool is_instruction, bool backlight)
 {
-	//1 for DATA REGISTER, 0 for INSTRUCTION REGISTER
+	// 1 for DATA REGISTER, 0 for INSTRUCTION REGISTER
 	const uint8_t REGISTER_SELECT = !is_instruction;
 
 	uint8_t hi = data & 0xF0;
 	uint8_t lo = (data << 4) & 0xF0;
+	const uint8_t backlight_mask = backlight ? 1 << 3 : 0;
 
 	uint8_t data_arr[4] = {0};
-	data_arr[0] = hi | REGISTER_SELECT | PIN_ENABLE;
-	data_arr[1] = 0;	//Trigger send by falling edge
-	data_arr[2] = lo | REGISTER_SELECT | PIN_ENABLE;
-	data_arr[3] |= backlight ? 1 << 3 : 0; //Next send, but control backlight
+	// When the 4 bit length is selected, data must be sent or received twice.
+	data_arr[0] = hi | REGISTER_SELECT | PIN_ENABLE | backlight_mask;
+	data_arr[1] = hi | REGISTER_SELECT | backlight_mask;
+	data_arr[2] = lo | REGISTER_SELECT | PIN_ENABLE | backlight_mask;
+	data_arr[3] = lo | REGISTER_SELECT | backlight_mask;
 
 	while( HAL_I2C_IsDeviceReady(_i2c_handle, _i2c_addr, 1, HAL_MAX_DELAY) != HAL_OK);
 
