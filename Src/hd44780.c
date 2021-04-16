@@ -5,23 +5,23 @@
 uint8_t _i2c_addr = 0;
 I2C_HandleTypeDef* _i2c_handle = NULL;
 
-void HD44780_init_I2C(I2C_HandleTypeDef* handle)
+void HD44780_I2C_init(I2C_HandleTypeDef* handle)
 {
 	_i2c_handle = handle;
-	HD44780_set_I2C_addr(0X27);
+	HD44780_I2C_set_addr(0X27);
 
 	// First instruction selects the 'function set': the amount of display lines, character font.
 	// For now just support 2 lines which can only use 5x7 dots per character. 1 line also can handle 5x10 dots character font
 	const uint8_t function_set = 0x38;
-	HD44780_send_I2C(function_set, true, true);
+	HD44780_I2C_send(function_set, true, true);
 
-	HD44780_send_I2C(HD44780_HOME, true, true);
+	HD44780_I2C_send(HD44780_HOME, true, true);
 	//HD44780_send_I2C(HD44780_DISPLAY_ON_CRS_OFF, true, true);
-	HD44780_send_I2C(HD44780_DISPLAY_ON_CRS_BLNK, true, true);
-	HD44780_send_I2C(HD44780_CLEAR, true, true);
+	HD44780_I2C_send(HD44780_DISPLAY_ON_CRS_BLNK, true, true);
+	HD44780_I2C_send(HD44780_CLEAR, true, true);
 }
 
-void HD44780_send_I2C(uint8_t data, bool is_instruction, bool backlight)
+void HD44780_I2C_send(uint8_t data, bool is_instruction, bool backlight)
 {
 	// 1 for DATA REGISTER, 0 for INSTRUCTION REGISTER
 	const uint8_t REGISTER_SELECT = !is_instruction;
@@ -43,27 +43,27 @@ void HD44780_send_I2C(uint8_t data, bool is_instruction, bool backlight)
 	HAL_Delay(5);
 }
 
-void HD44780_sends_I2C(char* str, bool backlight)
+void HD44780_I2C_sends(char* str, bool backlight)
 {
 	while(*str){
-		HD44780_send_I2C((uint8_t) *str, false, backlight);
+		HD44780_I2C_send((uint8_t) *str, false, backlight);
 		str++;
 	}
 }
 
-void HD44780_cursor_pos_I2C(uint8_t pos, bool backlight)
+void HD44780_I2C_cursor_pos(uint8_t pos, bool backlight)
 {
 	// Made for 40 character 4 line display
 	// Line one shows first 16, second one shows 64-79
-	HD44780_send_I2C(0x80 + pos, true, backlight);
+	HD44780_I2C_send(0x80 + pos, true, backlight);
 }
 
-void HD44780_cursor_pos_I2C_second_line(uint8_t pos, bool backlight)
+void HD44780_I2C_cursor_pos_second_line(uint8_t pos, bool backlight)
 {
-	HD44780_cursor_pos_I2C(pos + 64, backlight);
+	HD44780_I2C_cursor_pos(pos + 64, backlight);
 }
 
-void HD44780_set_I2C_addr(uint8_t i2c_addr)
+void HD44780_I2C_set_addr(uint8_t i2c_addr)
 {
 	// Address depends on screen module. solder pads (usually labeled A0-A1-A2 ) can be used to change address
 	// The device 7 bits address value in data sheet must be shifted to the left (says HAL_I2C_Master_Transmit)
