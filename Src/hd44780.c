@@ -19,6 +19,9 @@ void HD44780_I2C_init(I2C_HandleTypeDef* handle)
 	//HD44780_send_I2C(HD44780_DISPLAY_ON_CRS_OFF, true, true);
 	HD44780_I2C_send(HD44780_DISPLAY_ON_CRS_BLNK, true, true);
 	HD44780_I2C_send(HD44780_CLEAR, true, true);
+
+	//HD44780_I2C_send(HD44780_INC_CRS, true, true);
+
 }
 
 void HD44780_I2C_send(uint8_t data, bool is_instruction, bool backlight)
