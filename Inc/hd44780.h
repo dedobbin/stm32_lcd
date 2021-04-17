@@ -31,6 +31,7 @@
 void HD44780_I2C_init(I2C_HandleTypeDef* handle);
 void HD44780_I2C_send(uint8_t data, bool is_instruction, bool backlight);
 void HD44780_I2C_sends(char* str, bool backlight);
+void HD44780_I2C_chunk_send(uint8_t* data, size_t data_size, bool is_instruction, bool backlight);
 void HD44780_I2C_cursor_pos(uint8_t pos, bool backlight);
 void HD44780_I2C_cursor_pos_second_line(uint8_t pos, bool backlight);
 void HD44780_I2C_set_addr(uint8_t i2c_addr);
